@@ -59,23 +59,29 @@ exports.get = function (req, res) {
         WaitTimeSeconds: 0
     };
 
-    sqs.receiveMessage(params, function(err, data){
-        if(err)
+    sqs.receiveMessage(params, function (err, data) {
+        console.log(data);
+        if (err)
             res.send(err);
-        else if(data.MessageId){
+        else if (data.Messages) {
             var message = data;
+            console.log(data.Messages[0].ReceiptHandle)
             var deleteParams = {
                 QueueUrl: queueURL,
                 ReceiptHandle: data.Messages[0].ReceiptHandle
-              };
-            
-            sqs.deleteMessage(deleteParams, function(err, data){
-                if(err)
+            };
+
+            sqs.deleteMessage(deleteParams, function (err, data) {
+                console.log(data);
+                if (err)
                     res.send(err)
-                else{
-                    res.send(message);
+                else {
+                    res.send(message.Messages[0].Body);
                 }
             })
+        } else {
+            res.send("No messages available in the queue");
+
         }
     })
 }
